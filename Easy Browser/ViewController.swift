@@ -9,24 +9,22 @@
 import UIKit
 import WebKit
 
-class ViewController: UIViewController, WKNavigationDelegate {
+class ViewController: UITableViewController, WKNavigationDelegate {
     var websites = ["github.com", "apple.com", "google.com"]
     var webView: WKWebView!
     var progressView: UIProgressView!
     
     override func loadView() {
+        super.loadView()
+        
         webView = WKWebView()
         webView.navigationDelegate = self
-        view = webView
-        
         
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = URL(string: "https://" + websites[0])!
-        webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Open", style: .plain, target: self, action: #selector(openTapped))
@@ -46,6 +44,22 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
     }
     
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return websites.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Sites", for: indexPath)
+       
+        cell.textLabel?.text = websites[indexPath.row]
+        
+        return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        loadUrl(title: websites[indexPath.row])
+    }
+    
     @objc func openTapped() {
         let ac = UIAlertController(title: "Open Page...", message: nil, preferredStyle: .actionSheet)
         
@@ -59,8 +73,13 @@ class ViewController: UIViewController, WKNavigationDelegate {
     }
     
     func openPage(action: UIAlertAction) {
-        let url = URL(string: "https://" + action.title!)!
+        loadUrl(title: action.title!)
+    }
+    
+    func loadUrl(title: String) {
+        let url = URL(string: "https://" + title)!
         webView.load(URLRequest(url: url))
+        view = webView
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
